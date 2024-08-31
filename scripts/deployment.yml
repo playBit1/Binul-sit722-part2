@@ -1,1 +1,74 @@
-# Write Kubernetes Deployment Script
+# Specifies the version of the Kubernetes API you're using
+apiVersion: apps/v1
+
+# Defines that this is a Deployment object
+kind: Deployment
+
+# Metadata about the Deployment
+metadata:
+  # Sets the name of the Deployment
+  name: book-catalog
+
+# Specification for the Deployment
+spec:
+  # Number of identical pods to run
+  replicas: 1
+
+  # Defines how the Deployment finds which Pods to manage
+  selector:
+    matchLabels:
+      # Selects Pods with the label "app: book-catalog"
+      app: book-catalog
+
+  # Template for creating Pods
+  template:
+    # Metadata for the Pods
+    metadata:
+      # Labels attached to the Pods
+      labels:
+        app: book-catalog
+
+    # Specification for the Pods
+    spec:
+      # List of containers in the Pod
+      containers:
+        # First (and only) container
+        - name: book-catalog # Name of the container
+          image: book-catalog:latest # Docker image to use
+          imagePullPolicy: Never # Don't try to pull the image, use local only
+
+          # Environment variables for the container
+          env:
+            - name: PORT # Sets an environment variable named PORT
+              value: '4000' # With the value 4000
+            - name: DATABASE_URL # Sets the DATABASE_URL environment variable
+              value: 'postgresql://task2db_tqyn_user:cEyU4VAPq8uGpxjl9R6dCJLFnIhhHHs5@dpg-cr7bseij1k6c739os3cg-a.singapore-postgres.render.com/task2db_tqyn'
+
+--- # Separator between Kubernetes objects in the same file
+
+# Specifies the version of the Kubernetes API for the Service
+apiVersion: v1
+
+# Defines that this is a Service object
+kind: Service
+
+# Metadata about the Service
+metadata:
+  # Sets the name of the Service
+  name: book-catalog
+
+# Specification for the Service
+spec:
+  # Defines which Pods are targeted by this Service
+  selector:
+    app: book-catalog # Selects Pods with the label "app: book-catalog"
+
+  # Specifies the type of Service
+  type: NodePort # Makes the Service accessible from outside the cluster
+
+  # Defines the ports for the Service
+  ports:
+    - protocol: TCP # Uses TCP protocol
+      port: 80 # The port the Service listens on within the cluster
+      targetPort: 4000 # The port the application is running on in the Pod
+      nodePort: 30000 # The port exposed on each node's IP
